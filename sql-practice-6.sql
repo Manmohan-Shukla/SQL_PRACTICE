@@ -214,3 +214,67 @@ SELECT
         2
     ) AS percentage_contribution
 FROM ord;
+
+
+SELECT
+    order_id,
+    product,
+    order_date,
+    sales,
+    LAG(sales) OVER (
+        PARTITION BY product
+        ORDER BY order_date
+    ) AS previous_order_sales
+FROM ord;
+
+
+SELECT
+    order_id,
+    product,
+    order_date,
+    sales,
+    LEAD(sales) OVER (
+        PARTITION BY product
+        ORDER BY order_date
+    ) AS previous_order_sales
+FROM ord;
+
+SELECT
+    order_id,
+    product,
+    order_date,
+    sales,
+    sales - LAG(sales) OVER (
+        PARTITION BY product
+        ORDER BY order_date
+    ) AS sales_difference
+FROM ord;
+
+
+SELECT
+    order_id,
+    product,
+    order_date,
+    MIN(order_date) OVER (
+        PARTITION BY product
+    ) AS first_order_date,
+    MAX(order_date) OVER (
+        PARTITION BY product
+    ) AS last_order_date
+FROM ord;
+
+
+
+SELECT
+    order_id,
+    product,
+    order_date,
+    MAX(SALES)OVER() highestsellingproduct
+FROM ord;
+
+SELECT
+    order_id,
+    product,
+    order_date,
+    MAX(SALES)OVER(PARTITION BY order_status) highestsellingproduct
+FROM ord;
