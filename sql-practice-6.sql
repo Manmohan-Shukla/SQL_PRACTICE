@@ -29,11 +29,11 @@ Q12. Calculate the running total of all sales, ordered by date.
 
 Q13. Calculate the running total of sales for each product and status combination.
 
-Q14. Calculate the percentage contribution of each order to its product's total sales.
+Q14. Calculate the percentage contribution of each order to its products total sales.
 
 Level 4 — LAG() and LEAD()
 
-Q15. Find the previous order's sales for each product.
+Q15. Find the previous orders sales for each product.
 
 Q16. Find the next orders sales for each product.
 
@@ -133,3 +133,84 @@ FROM (
     FROM ord
 ) t
 WHERE sales_rank = 1;
+
+SELECT
+    order_id,
+    product,
+    sales
+FROM (
+    SELECT 
+        order_id,
+        product,
+        sales,
+        RANK() OVER(
+            PARTITION BY product 
+            ORDER BY sales DESC
+        ) AS sales_rank
+    FROM ord
+) t
+WHERE sales_rank = 2;
+
+
+SELECT
+    order_id,
+    product,
+    sales
+FROM (
+    SELECT 
+        order_id,
+        product,
+        sales,
+        RANK() OVER(
+            PARTITION BY product 
+            ORDER BY sales DESC
+        ) AS sales_rank
+    FROM ord
+) t
+WHERE sales_rank IN (1,2);
+
+
+SELECT
+order_id,
+product,
+sales,
+SUM(sales) OVER(PARTITION BY product
+ORDER BY order_date
+ROWS BETWEEN UNBOUNDED PRECEDING  AND CURRENT ROW
+) AS running_total
+FROM ord
+;
+
+
+
+SELECT
+order_id,
+product,
+sales,
+SUM(sales) OVER( 
+ORDER BY order_date
+ROWS BETWEEN UNBOUNDED PRECEDING  AND CURRENT ROW
+) AS running_total
+FROM ord;
+
+
+SELECT
+order_id,
+product,
+sales,
+SUM(sales) OVER( PARTITION BY product, order_status
+ORDER BY order_date
+ROWS BETWEEN UNBOUNDED PRECEDING  AND CURRENT ROW
+) AS running_total
+FROM ord;
+
+SELECT
+    order_id,
+    product,
+    sales,
+    ROUND(
+        sales * 100.0
+        / SUM(sales) OVER (PARTITION BY product),
+        2
+    ) AS percentage_contribution
+FROM ord;
